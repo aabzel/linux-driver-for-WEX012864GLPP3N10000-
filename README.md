@@ -1,5 +1,5 @@
 # linux-driver-for-WEX012864GLPP3N10000-
-the linux driver for graphic OLED display.  
+The linux driver for graphic monochrome OLED display.  
 
 List of required hardware:
 1.	Beagle Bone Black board
@@ -23,12 +23,12 @@ ______________pinout____________________
 | 10  |  D6	  |    P8.39      |   76   |
 | 11  |  D7	  |    P8.40      |   77   |
 | 12  |  CS#  |    P8.37      |   78   |
-| 13  |  NC	  |   	-	        |	  -    |
+| 13  |  NC	  |   	-         |	  -    |
 | 14  |  RES# |    P8.38      |   79   |
 | 15  |  R/W# |    P8.36      |   80   |
 | 16  |  D/C# |    P8.34      |   81   |
 | 17  |  E/RD#|    P8.35      |   8    |
-| 18  |  NC	  |    	-	        |	  -    |
+| 18  |  NC	  |    	-         |	  -    |
 | 19  |  DISP |	   P8.33      |   9    |
 | 20  |  NC	  | 	-	          |	  -    |
 |_____|_______|_____-_________|___-____|
