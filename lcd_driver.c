@@ -1,6 +1,6 @@
 /**
  * @file   lcd_driver.c
- * @author Alexander Barunin
+ * @author Alexander Barunin aabzel@yandex.ru
  * @date   15 Jul 2016
  * @brief 
 # linux-driver-for-WEX012864GLPP3N10000
@@ -66,10 +66,10 @@ MODULE_DESCRIPTION("OLED display driver for the BBB");
 MODULE_VERSION("0.1");
 
 
-static char *info_str = "lcd device driver\nAuthor Alex Bar\n"; 
+static char *info_str = "lcd device driver.\nAuthor: Alexander Barunin aabzel@yandex.ru\n"; 
 
 static int    majorNumber;                  ///< Stores the device number -- determined automatically
-static char   textptr[300]   = {0};
+static char   textptr[300]  = {0};
 static char   message[1024] = {0};           ///< Memory for the string that is passed from userspace
 static short  size_of_message=0;              ///< Used to remember the size of the string stored
 static int    numberOpens = 0;              ///< Counts the number of times the device is opened
