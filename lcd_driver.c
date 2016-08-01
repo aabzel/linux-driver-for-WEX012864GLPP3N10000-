@@ -1,6 +1,6 @@
 /**
  * @file   lcd_driver.c
- * @author Alexander Barunin aabzel@yandex.ru
+ * @author Alexander Barunin
  * @date   15 Jul 2016
  * @brief 
 # linux-driver-for-WEX012864GLPP3N10000
@@ -60,16 +60,17 @@ ______________pinout____________________
 #define  DEVICE_NAME "display"    ///< The device will appear at /dev/display using this value
 #define  CLASS_NAME  "ebb"        ///< The device class -- this is a character device driver
 
+#define SIZE_OF_TXT_BUFF 300
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Alexander Barunin");
 MODULE_DESCRIPTION("OLED display driver for the BBB");
 MODULE_VERSION("0.1");
 
 
-static char *info_str = "lcd device driver.\nAuthor: Alexander Barunin aabzel@yandex.ru\n"; 
+static char *info_str = "lcd device driver\nAuthor Alex Bar\n"; 
 
 static int    majorNumber;                  ///< Stores the device number -- determined automatically
-static char   textptr[300]  = {0};
+static char   textptr[SIZE_OF_TXT_BUFF]   = {0};
 static char   message[1024] = {0};           ///< Memory for the string that is passed from userspace
 static short  size_of_message=0;              ///< Used to remember the size of the string stored
 static int    numberOpens = 0;              ///< Counts the number of times the device is opened
@@ -1052,8 +1053,10 @@ void glcd_putc36(char inputCharacter)
   else
      memcpy(pixelData, TEXT_3x6_1[inputCharacter-32], 4);
        
-  for(j=0; j<4; ++j, glcd_x+=glcd_size) {   // Loop through character byte data
-    for(k=0; k<8*glcd_size; ++k) {         // Loop through the vertical pixels
+  for(j=0; j<4; ++j, glcd_x+=glcd_size) 
+  {   // Loop through character byte data
+    for(k=0; k<8*glcd_size; ++k) 
+	{         // Loop through the vertical pixels
       if(bit_test(pixelData[j], k)) {// Check if the pixel should be set
         for(l=0; l<glcd_size; ++l) {     // The next two loops change the
           for(m=0; m<glcd_size; ++m){
@@ -1068,15 +1071,20 @@ void glcd_putc36(char inputCharacter)
         }
       }
     }
-    if(127<glcd_x){
+    
+	if(127<glcd_x)
+	{
       glcd_x=0;
     }
   }
+  
   //glcd_x += glcd_size;
-  if(127<glcd_x){
+  if(127<glcd_x)
+  {
     glcd_x=0;
   }
 }
+
 
 
 
@@ -1084,10 +1092,65 @@ void glcd_putc36(char inputCharacter)
 // Purpose:       Write text string in 3x6 font on a graphic LCD
 static void glcd_text36(char* intextptr)
 {
-  for(; *intextptr != '\0'; ++intextptr)   {               // Loop through the passed string
+  for(; *intextptr != '\0'; ++intextptr)   
+  {               // Loop through the passed string
     glcd_putc36(*intextptr);
     display();
   }
+}
+
+
+
+//---------------------------------------------------------------------
+static void parseCommand(char *inputCmd)
+{
+  char *strPtr;
+  int len=0;
+  len=strlen(inputCmd);
+  printk(KERN_INFO "DISPLAY_DRV: length of inputCmd  %d \n", len);
+
+  
+  
+  strPtr=strstr(inputCmd, "-clear");
+  if ( strPtr != NULL)
+  {
+    clearScreen();
+    glcd_x=0;
+    glcd_y=0;
+	return;
+  }
+  
+  strPtr=strstr(inputCmd, "-dot");
+  if ( strPtr != NULL )
+  {
+    int col=0, line=0, colour=0;
+    sscanf(strPtr+strlen("-dot"), "%d%d%d", &col, &line, &colour);
+    glcd_pixel( col,  line,  colour);
+    display();
+	return;
+  }
+  
+  strPtr=strstr(inputCmd, "-text");
+  if ( strPtr != NULL)
+  {
+	char *startOfText;
+	int col=0, line=0,lenOfText=0;
+    sscanf(strPtr+strlen("-text"), "%d%d%s", &col, &line, &textptr[0] );
+    
+	startOfText=strstr(inputCmd, textptr);
+	
+	glcd_x    = col;
+	glcd_y    = line;
+	lenOfText = strlen(startOfText);
+	printk(KERN_INFO "DISPLAY_DRV: length of user text  %d \n", lenOfText);
+	//strncpy(textptr, startOfText, sizeof(textptr) - 1);
+	//textptr[lenOfText + 1] = '\0';
+	startOfText[lenOfText ] = '\0';
+    glcd_text36(startOfText);
+	
+	return;
+  }
+
 }
 
 //-----------------------------------------------------------------------------------------------------
@@ -1105,7 +1168,8 @@ static int __init lcdDriver_init(void){
 
    // Register the device class
    ebbcharClass = class_create(THIS_MODULE, CLASS_NAME);
-   if (IS_ERR(ebbcharClass)){                // Check for error and clean up if there is
+   if (IS_ERR(ebbcharClass))
+   {                // Check for error and clean up if there is
       unregister_chrdev(majorNumber, DEVICE_NAME);
       printk(KERN_ALERT "Failed to register device class\n");
       return PTR_ERR(ebbcharClass);          // Correct way to return an error on a pointer
@@ -1133,7 +1197,7 @@ static int __init lcdDriver_init(void){
    int k=0;
    for(k=0; k<1024; k++)
    {
-      message[k]=0x00;   
+      message[k]='\0';   
    }
    
    
@@ -1234,18 +1298,22 @@ static ssize_t dev_read(struct file *filep, char *buffer, size_t len, loff_t *of
  */
 static ssize_t dev_write(struct file *filep, const char *buffer, size_t len, loff_t *offset)
 {
+   memset(&message[0], 0x00, sizeof(message) );
    sprintf(&message[0], "%s", buffer, len);   // appending received string with its length
+   message[len+1]='\0'; 
    size_of_message = strlen(message);         // store the length of the stored message does not work
    printk(KERN_INFO "LCD_TEST: size_of_message: %d \n", size_of_message);
    printk(KERN_INFO "LCD_TEST: len: %d \n", len);
    
    if( (0<len) && (len<200)  )
-   {  
-      printk(KERN_INFO "LCD_TEST: print message to screen\n", len);
-      sprintf(textptr, message); 
+   {
+	  message[len]='\0'; 
+      parseCommand(&message[0] );
+      //printk(KERN_INFO "LCD_TEST: print message to screen\n", len);
+      //sprintf(textptr, message); 
        //sprintf(textptr, "%s (%d let)", buffer, len);   // appending received string with its length
-      textptr[len+1] = '\0';
-      glcd_text36(textptr);
+      //textptr[len+1] = '\0';
+      //glcd_text36(textptr);
    }
    
 //   int i;
