@@ -1,5 +1,5 @@
 # linux-driver-for-WEX012864GLPP3N10000-
-The linux driver for graphic monochrome OLED display.  
+The linux driver for graphic monochrome OLED display.  The WEX012864GLPP3N10000 is based on SSD1305 controller.
 
 List of required hardware:
 1.	Beagle Bone Black board
