@@ -51,5 +51,5 @@ optargs=quiet drm.debug=7 capemgr.disable_partno=BB-BONELT-HDMI,BB-BONELT-HDMIN
 4.	Reboot the board:  shutdown -r now
 
 
-
+ 
 
