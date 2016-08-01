@@ -39,16 +39,18 @@ In order to use GPIO pins for LCD it is necessary to disable the HDMI Cape.
 
 Instruction:
 
-1.	Open boot/uEnv.txt
+1. Open boot/uEnv.txt
 
-2.	To disable the HDMI Cape, change the contents of uEnv.txt.
+2. To disable the HDMI Cape, change the contents of uEnv.txt to:
 Add line: 
 
 optargs=quiet drm.debug=7 capemgr.disable_partno=BB-BONELT-HDMI,BB-BONELT-HDMIN
 
-3.	save boot/uEnv.txt
+3. save boot/uEnv.txt
 
-4.	Reboot the board:  shutdown -r now
+4. Reboot the board:  shutdown -r now
+
+
 
 
  
